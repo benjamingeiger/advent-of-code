@@ -1,0 +1,121 @@
+Hull Breach (no items)
+	* east: Holodeck
+	* south: Stables
+	* west: Sick Bay
+
+Holodeck (no items)
+	* west: Hull Breach
+
+Stables (cake)
+	* north: Hull Breach
+	* east: Observatory 
+	* south: Kitchen
+
+Observatory (giant electromagnet)
+	* east: Passages 
+	* west: Stables
+
+Passages (infinite loop)
+	* north: Science Lab
+	* west: Observatory
+
+Science Lab (photons)
+	* south: Passages
+
+Kitchen (no items)
+	* north: Stables
+	* west: Arcade
+
+Arcade (mutex)
+	* east: Kitchen
+
+Sick Bay (klein bottle)
+	* east: Hull Breach
+	* south: Hot Chocolate Fountain
+	* west: Storage
+
+Hot Chocolate Fountain (no items)
+	* north: Sick Bay
+	* east: Gift Wrapping Center
+	* west: Hallway
+
+Gift Wrapping Center (monolith)
+	* south: Crew Quarters
+	* west: Hot Chocolate Fountain
+
+Crew Quarters (fuel cell)
+	* north: Gift Wrapping Center
+	* west: Corridor
+
+Corridor (escape pod)
+	* east: Crew Quarters
+	* west: Warp Drive Maintenance
+
+Warp Drive Maintenance (astrolabe)
+	* east: Corridor
+
+Hallway (molten lava)
+	* east: Hot Chocolate Fountain
+
+Storage (no items)
+	* north: Engineering
+	* east: Sick Bay
+	* west: Navigation
+
+Engineering (tambourine)
+	* south: Storage
+
+Navigation (dark matter)
+	* east: Storage
+	* west: Security Checkpoint
+
+Security Checkpoint (no items)
+	* north: Pressure-Sensitive Floor
+	* east: Navigation
+
+
+SOLUTION SUCCESS: ['monolith', 'astrolabe', 'tambourine', 'dark matter']
+
+Hull Breach
+west
+Sick Bay
+west
+Storage
+north
+Engineering
+take tambourine
+south
+Storage
+west
+Navigation
+take dark matter
+west
+Security Checkpoint
+north
+
+monolith: west south east
+astrolabe: monolith south west west
+tambourine: west west north
+dark matter: west west west
+
+west
+south
+east
+take monolith
+south
+west
+west
+take astrolabe
+east
+east
+north
+west
+north
+west
+north
+take tambourine
+south
+west
+take dark matter
+west
+north
