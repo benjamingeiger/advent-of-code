@@ -187,3 +187,9 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
+
+
+getinput.sh
+input.real.txt
+input.test.txt
+
