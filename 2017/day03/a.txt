@@ -1,0 +1,14 @@
+Solved by hand.
+
+Input is 312051. The largest square smaller than the input is 558^2, or 311364.
+
+Perfect squares are found at the top left corners of completed squares. (Odd
+squares are found at the bottom rights of those squares.)
+
+This leaves 687 units between the top left corner of the completed square and
+the target square. If we go 559 units, we end up at the bottom left corner of
+the next square, with 128 units left to go.
+
+From the initial square to the bottom left corner has a Manhattan distance of
+558 steps. But, the target square is 128 units closer, so we can subtract those
+128 units from the 558 unit distance, giving a distance of 430.
