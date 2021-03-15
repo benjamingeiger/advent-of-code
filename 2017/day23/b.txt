@@ -1,0 +1,83 @@
+// initial setup
+     0: set b 84	// b <- 84
+     1: set c b		// c <- b (c = 84?)
+     2: jnz a 2		// if a <> 0 then goto 4
+     3: jnz 1 5		// goto 8
+     
+// setup only if a <> 0
+     4: mul b 100	// b *= 100
+     5: sub b -100000	// b += 100000
+     6: set c b		// c = b
+     7: sub c -17000
+
+     8: set f 1
+     9: set d 2
+
+    10: set e 2
+
+    11: set g d
+    12: mul g e
+    13: sub g b		// g = d * e - b
+    14: jnz g 2
+    15: set f 0		// 11-15: if d * e = b then f <- 0
+    
+    16: sub e -1
+
+    17: set g e
+    18: sub g b
+    19: jnz g -8	// 17-19: if e <> b then goto 11
+    20: sub d -1
+    21: set g d
+    22: sub g b
+    23: jnz g -13	// if g <> 0 then goto 10
+    24: jnz f 2		
+    25: sub h -1	// if f = 0 then h += 1
+    26: set g b
+    27: sub g c		// g <- b - c
+    28: jnz g 2		// 26-29: if b = c then halt
+    29: jnz 1 3		
+    30: sub b -17	// b -= 17
+    31: jnz 1 -23	// goto 8
+
+
+b = 84
+c = b
+if (a != 0) {
+	b = 108400
+	c = 125400
+}
+
+for (;;) {
+	// f: flag if b is prime
+	f = 1 
+
+	// d, e: possible factors
+	d = 2
+	e = 2
+
+	// for all combinations of d and e:
+	do {
+		do {
+			// if d * e = b then b is composite therefore clear f
+			if (d * e == b) {
+				f = 0
+			}
+			e++
+		} while (e != b) 
+
+		d++
+	} while (d != b)
+
+	// if the flag has been cleared then increment h
+	if (f = 0) {
+		h++
+	}
+
+	// do this for all numbers between b and c, by 17s (108400, 108417, 108434...)
+	if (b == c) { break }
+
+	b += 17
+}
+
+// So, the final answer came from Wolfram Alpha: "how many composite numbers between 108400 and 125400 inclusive are congruent to 8 modulo 17"
+// Answer: 903 integers
