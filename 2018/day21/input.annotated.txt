@@ -1,0 +1,46 @@
+        #ip 2
+
+// implementation verification mentioned in statement
+     0  seti 123 _ r5
+     1  bani r5 456 r5
+     2  eqri r5 72 r5
+     3  addr r5 ip ip
+     4  seti 0 _ ip             if (123 && 456) <> 72 then goto 0
+
+// actual program starts here
+
+     5  seti 0 _ r5
+
+     6  bori r5 65536 r3        r3 <- r5 with the low 6 bits set       <----+
+     7  seti 9010242 _ r5       r5 <- 9010242                               |
+                                                                            |
+     8  bani r3 255 r1          r1 <- r3 % 2^8                       <--+   |
+     9  addr r5 r1 r5           r5 <- r5 + (r3 % 2^8)                   |   |
+    10  bani r5 16777215 r5     r5 <- r5 % 2^16                         |   |
+    11  muli r5 65899 r5                                                |   |
+    12  bani r5 16777215 r5     r5 <- r5 % 2^16                         |   |
+                                                                        |   |
+    13  gtir 256 3 r1           -                                       |   |
+    14  addr r1 ip ip           |                                       |   |
+    15  addi ip 1 ip            |                                       |   |
+    16  seti 27 _ ip            if r3 < 256 then goto 28     --+        |   |
+                                                               |        |   |
+    17  seti 0 _ r1             r1 <- 0                        |        |   |
+                                                               |        |   |
+    18  addi r1 1 r4            r4 <- r1 + 1                   |  <--+  |   |
+    19  muli r4 256 r4          r4 <- r4 + 256                 |     |  |   |
+    20  gtrr r4 r3 r4           -                              |     |  |   |
+    21  addr r4 ip ip           |                              |     |  |   |
+    22  addi ip 1 ip            |                              |     |  |   |
+    23  seti 25 _ ip            if r4 > r3 then goto 26  --+   |     |  |   |
+                                                           |   |     |  |   |
+    24  addi r1 1 r1                                       |   |     |  |   |
+    25  seti 17 _ ip            goto 18                    |   |  ---+  |   |
+                                                           |   |        |   |
+    26  setr r1 _ r3                                     <-+   |        |   |
+    27  seti 7 _ ip             goto 8                         |    ----+   |
+                                                               |            |
+    28  eqrr r5 r0 r1                                        <-+            |
+    29  addr r1 ip ip           if r5 = r0 then halt                        |
+    30  seti 5 _ ip             goto 6                                 -----+
+
