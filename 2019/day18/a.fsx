@@ -3,7 +3,6 @@
 open System
 
 type Cell =
-    (*| Wall*)
     | Open
     | Door of char
     | Key of char
@@ -68,16 +67,12 @@ let shortestPaths maze start =
 
     go Map.empty Set.empty ([(start, 0, [])], [])
 
-(*printfn "%A" input*)
-
 let startPos =
     input 
     |> Map.filter (fun _ v -> v = Start)
     |> Map.toList
-    |> List.exactlyOne
+    |> List.head
     |> fst
-
-(*printfn "%A" startPos*)
 
 let generateDirections source result =
     result
@@ -89,7 +84,6 @@ let keysFromStart = shortestPaths input startPos
 let keyDistances =
     keysFromStart
     |> Map.toList
-    (*|> List.map (fun (_, (pos, _, _)) -> pos)*)
     |> List.collect (fun (k, (pos, _, _)) -> 
         shortestPaths input pos
         |> generateDirections k)
@@ -119,11 +113,7 @@ let dijkstra distances =
         |> Set.add '@'
 
     let rec go s q =
-        (*eprintfn "%A %A" s q*)
-
         let (distance, keys, cur) = Set.minElement q
-
-        (*eprintfn "PROCESSING %A %A %A" distance keys cur*)
         let q' = Set.remove (distance, keys, cur) q
         
         if keys = allKeys then
@@ -138,7 +128,6 @@ let dijkstra distances =
             let s' = Set.add (keys, List.head cur) s
 
             let neighbors = potentialNextEdges distances (distance, keys, cur)
-            (*eprintfn "neighbors: %A" neighbors*)
 
             go s' (Set.union q' neighbors)
 
