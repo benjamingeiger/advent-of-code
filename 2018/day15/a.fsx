@@ -2,9 +2,10 @@
 
 open System
 
-type Cell = Empty | Goblin of int | Elf of int | Wall
+type Cell = Wall | Empty | Goblin of int | Elf of int
 
 let initHitPoints = 200
+let attackPower = 3
 
 let readLines filePath = System.IO.File.ReadLines filePath
 let input =
@@ -61,3 +62,88 @@ printfn "%A" input
 
 dumpMap input
 
+module Seq =
+    let tryMin xs =
+        if Seq.isEmpty xs then None else Seq.min xs |> Some
+
+let doTurn map (r, c) =
+    let manhattan (r', c') = abs (r' - r) + abs (c' - c)
+
+    let getCell (r', c') = Map.find (r', c') map
+
+    let isEnemy u v =
+        match u, v with
+        | Goblin _, Elf _ -> true
+        | Elf _, Goblin _ -> true
+        | _, _ -> false
+
+    let targets u = 
+        map
+        |> Map.filter (fun _ v -> isEnemy u v)
+        |> Map.toSeq
+
+    let adjacent (r', c') = [(r' - 1, c'); (r', c' - 1); (r', c' + 1); (r' + 1, c')]
+
+    let attack (r', c') =
+        match getCell (r', c') with
+        | Some (Elf hp) ->
+            map
+            |> Map.add (r', c') (
+                if hp <= attackPower then
+                    Elf (hp - attackPower)
+                else
+                    Empty)
+        | Some (Goblin hp) ->
+            map
+            |> Map.add (r', c') (
+                if hp <= attackPower then
+                    Goblin (hp - attackPower)
+                else
+                    Empty)
+        | _ -> map
+
+    let move targets =
+        // todo: work on this next, need to implement bfs.
+        // maybe run bfs from any open spaces near the current unit
+        // and take the one with the shortest distance to the target
+        // (taking the first (top, left, right, bottom) if there are ties)
+        // so we don't have to worry about multipathing?
+        map
+
+    // need to add a wrapper around this to check for end of round, since
+    // once there are no more opponents all fighting stops and the round ends
+    //
+    // actually, wait? can we wait until the end of the round to determine
+    // whether combat is over? the question is, if (w.l.o.g.) the last goblin
+    // dies on the last turn of the round, does it count as a complete round?
+    match Map.tryFind (r, c) map with
+    | None | Some Wall | Some Empty -> map
+    | Some u ->
+        let targets =
+            map
+            |> Map.filter (fun _ v -> isEnemy u v)
+            |> Map.toSeq
+
+        adjacent (r, c)
+        |> Seq.tryFind (fun (r', c') -> Seq.contains (r', c') targets)
+        |> function
+            | Some (r', c') -> attack (r', c')
+            | None ->
+                move targets
+                // need to change this logic. maybe always "move" then attack if adjacent,
+                // but don't actually move if already adjacent?
+
+let doRound map =
+
+    let unitPositions =
+        map
+        |> Map.filter (fun _ v ->
+            match v with
+            | Wall | Empty -> false
+            | Elf _ | Goblin _ -> true)
+        |> Map.toList
+        |> List.map (fun ((r, c), _) -> (r, c))
+
+    Seq.fold doTurn map unitPositions
+
+dumpMap (doRound input)
