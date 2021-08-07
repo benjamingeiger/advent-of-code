@@ -4,11 +4,11 @@ open System
 
 type Cell = Wall | Empty | Goblin of int | Elf of int
 type Battlefield = Map<int * int, Cell>
-type CombatStatus = Fighting | CombatEnded
+type CombatStatus = Fighting | CombatEnded | MissionFailed
 type State = Battlefield * CombatStatus
 
 let initHitPoints = 200
-let attackPower = 3
+let goblinAttackPower = 3
 
 let readLines filePath = System.IO.File.ReadLines filePath
 let input : Battlefield =
@@ -154,6 +154,7 @@ let findMoveTarget battlefield myPos =
 let findMove battlefield myPos =
     match findMoveTarget battlefield myPos with
     | (_, CombatEnded)  -> (None, CombatEnded)
+    | (_, MissionFailed)  -> (None, MissionFailed)
     | (None, Fighting) -> (None, Fighting)
     | (Some target, _) ->
         let nextSteps = emptyNeighbors battlefield myPos
@@ -170,6 +171,7 @@ let doMove battlefield myPos =
 
     match findMove battlefield myPos with
     | (_, CombatEnded) -> (battlefield, myPos, CombatEnded)
+    | (_, MissionFailed) -> (battlefield, myPos, MissionFailed)
     | (None, Fighting) -> (battlefield, myPos, Fighting)
     | (Some target, _) ->
         battlefield
@@ -212,35 +214,42 @@ let findAttackTarget battlefield myPos =
         |> Seq.tryHead
         |> function | Some (_, pos) -> Some pos | _ -> None
 
-let doAttack battlefield myPos =
+let doAttack elfAttackPower battlefield myPos =
     printfn "Running attack from %A" myPos
     let me = getCell battlefield myPos
     let targetPos = findAttackTarget battlefield myPos
     match targetPos with
-    | None -> battlefield
+    | None -> (battlefield, Fighting)
     | Some targetPos' ->
         let target = getCell battlefield targetPos'
 
         let hitTarget =
             match target with
-            | Some (Elf hp) -> if hp <= attackPower then Empty else Elf (hp - attackPower)
-            | Some (Goblin hp) -> if hp <= attackPower then Empty else Goblin (hp - attackPower)
+            | Some (Elf hp) ->
+                if hp <= goblinAttackPower then
+                    Empty
+                else
+                    Elf (hp - goblinAttackPower)
+            | Some (Goblin hp) ->
+                if hp <= elfAttackPower then
+                    Empty
+                else
+                    Goblin (hp - elfAttackPower)
             | Some x -> x
             | None -> failwith "broken"
 
         printfn "hit target: %A (%A -> %A)" targetPos' target hitTarget
 
-        match me with
-        | Some (Elf _) | Some (Goblin _) -> battlefield |> Map.add targetPos' hitTarget
-        | _ -> battlefield
+        let newBattlefield = 
+            match me with
+            | Some (Elf _) | Some (Goblin _) -> battlefield |> Map.add targetPos' hitTarget
+            | _ -> battlefield
 
-(*let attackSwing = doAttack (fst input) (12, 22)*)
+        match (target, hitTarget) with
+        | Some (Elf _), Empty -> newBattlefield, MissionFailed
+        | _ -> newBattlefield, Fighting
 
-
-(*printfn "%A" (Map.find (12, 23) attackSwing)*)
-
-
-let doRound battlefield =
+let doRound elfAttackPower battlefield =
     let fighterPos =
         battlefield
         |> Map.filter (fun _ -> function | Elf _ | Goblin _ -> true | _ -> false)
@@ -253,36 +262,54 @@ let doRound battlefield =
         printfn "%A (%A) has initiative:" pos (getCell bf pos)
         match status with
         | CombatEnded -> bf, CombatEnded
+        | MissionFailed -> bf, MissionFailed
         | Fighting ->
             match getCell bf pos with
             | Some (Goblin _) | Some (Elf _) ->
                 let bf', pos', status' = doMove bf pos
                 match status' with
                 | Fighting -> 
-                    let bf'' = doAttack bf' pos'
-                    bf'', Fighting
+                    let bf'', status'' = doAttack elfAttackPower bf' pos'
+                    bf'', status''
                 | CombatEnded ->
                     printfn "Combat marked as ended"
                     bf', CombatEnded
+                | MissionFailed ->
+                    printfn "Combat ended with loss of elf"
+                    bf', MissionFailed
+
             | _ -> (bf, Fighting)
 
     Seq.fold doFighterRound (battlefield, Fighting) fighterPos
 
 
-let doBattle battlefield =
+let doBattle elfAttackPower battlefield =
     let rec step bf steps =
         printfn "Situation after %A rounds:" steps
         dumpMap bf
 
-        let bf', status = doRound bf
+        let bf', status = doRound elfAttackPower bf
         match status with
         | Fighting -> step bf' (steps + 1)
         | CombatEnded ->
             printfn "Combat ended after %A rounds" steps
-            (bf', steps)
+            (CombatEnded, bf', steps)
+        | MissionFailed ->
+            printfn "Combat ended after %A rounds due to elf death" steps
+            (MissionFailed, bf', steps)
 
     step battlefield 0
 
+let doSimulation battlefield =
+    let rec step elfAttackPower =
+        match doBattle elfAttackPower battlefield with
+        | (CombatEnded, bf, steps) -> (bf, steps)
+        | (MissionFailed, _, _) -> step (elfAttackPower + 1)
+        | (Fighting, _, _) -> failwith "how?"
+
+    step 4
+
+let result = doSimulation input
 
 let calculateOutcome (battlefield, rounds) =
     let totalhp =
@@ -295,15 +322,5 @@ let calculateOutcome (battlefield, rounds) =
 
     totalhp * rounds
 
-let result = doBattle input
-printfn "%A" result
-dumpMap (fst result)
-printfn "%A" (getCell (fst result) (3, 4))
-
 printfn "%A" (calculateOutcome result)
 
-let elves = Map.filter (fun _ v -> match v with | Elf _ -> true | _ -> false) (fst result)
-let goblins = Map.filter (fun _ v -> match v with | Goblin _ -> true | _ -> false) (fst result)
-
-printfn "Elves: %A" elves
-printfn "Goblins: %A" goblins
