@@ -115,23 +115,16 @@ let findTargets units =
 
 let doAttackPhase units attackPairs =
     let doAttack units' (attackerId, defenderId) =
-        (*printfn "Unit %A attacking unit %A" attackerId defenderId*)
         match Map.tryFind attackerId units' with
         | None ->
-            (*printfn "Attacker not found"*)
             units'
         | Some attacker ->
-            (*printfn "Attacker: %A" attacker*)
             match Map.tryFind defenderId units' with
             | None ->
-                (*printfn "Defender not found"*)
                 units'
             | Some defender ->
-                (*printfn "Defender: %A" defender*)
                 let attackDamage = damagePotential attacker defender
                 let unitsKilled = attackDamage / defender.UnitHp
-
-                printfn "%A/%A units killed" unitsKilled defender.UnitCount
 
                 if unitsKilled >= defender.UnitCount then
                     Map.remove defenderId units'
@@ -142,7 +135,6 @@ let doAttackPhase units attackPairs =
 
                     Map.add defenderId defender' units'
 
-    printfn "starting round of combat"
     let nextUnits = attackPairs |> List.fold doAttack units
     if nextUnits = units then None else Some nextUnits
 
@@ -155,7 +147,6 @@ let survivingTeams units =
 let doBattle units =
     let rec step units' =
         let targets = findTargets units'
-        printfn "%A" targets
         match doAttackPhase units' targets with
         | None -> None
         | Some units'' ->
@@ -202,6 +193,5 @@ let findBoost units =
 
 let result = findBoost allUnits
 
-printfn "%A" result
 printfn "%A" (countUnits result)
 

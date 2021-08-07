@@ -19,9 +19,6 @@ let immuneText, infectionText =
     // This assumes ordering but oh well
     |> fun (immuneText', infectionText') -> (List.tail immuneText', List.tail infectionText')
 
-printfn "%A" immuneText
-printfn "%A" infectionText
-
 let groupRegex = "(\d+) units each with (\d+) hit points (.*) ?with an attack that does (\d+) (\w+) damage at initiative (\d+)"
 
 type UnitGroup = {
@@ -79,8 +76,6 @@ let allUnits =
     |> Seq.map (fun u -> u.Initiative, u)
     |> Map.ofSeq
 
-printfn "%A" allUnits
-
 
 let effectivePower group = group.UnitCount * group.AttackDamage
 
@@ -120,27 +115,18 @@ let findTargets units =
     |> Map.toList
     |> List.sortByDescending id
 
-printfn "%A" (findTargets allUnits)
-
 let doAttackPhase units attackPairs =
     let doAttack units' (attackerId, defenderId) =
-        printfn "Unit %A attacking unit %A" attackerId defenderId
         match Map.tryFind attackerId units' with
         | None ->
-            printfn "Attacker not found"
             units'
         | Some attacker ->
-            printfn "Attacker: %A" attacker
             match Map.tryFind defenderId units' with
             | None ->
-                printfn "Defender not found"
                 units'
             | Some defender ->
-                printfn "Defender: %A" defender
                 let attackDamage = damagePotential attacker defender
                 let unitsKilled = attackDamage / defender.UnitHp
-
-                printfn "%A/%A units killed" unitsKilled defender.UnitCount
 
                 if unitsKilled > defender.UnitCount then
                     Map.remove defenderId units'
@@ -153,9 +139,6 @@ let doAttackPhase units attackPairs =
 
     attackPairs
     |> List.fold doAttack units
-
-printfn "%A" allUnits
-printfn "%A" (doAttackPhase allUnits (findTargets allUnits))
 
 let survivingTeams units =
     units
