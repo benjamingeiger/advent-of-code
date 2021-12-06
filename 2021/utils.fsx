@@ -9,8 +9,6 @@ let (|Regex|_|) pattern input =
     if m.Success then Some(List.tail [ for g in m.Groups -> g.Value ])
     else None
 
-let enumerateSeq s = Seq.zip (Seq.initInfinite id) s
-
 let memoize (f : 'a -> 'b) =
     let dict = new Dictionary<'a, 'b>()
 
@@ -24,4 +22,17 @@ let memoize (f : 'a -> 'b) =
 
     memoizedFunc
 
-let readLines filePath = System.IO.File.ReadLines filePath
+// borrowed from https://stackoverflow.com/questions/6736464/split-seq-in-f
+let splitSeq p s =
+    let i = ref 0
+    s
+    |> Seq.map (fun x ->
+        if p x then incr i
+        !i, x)
+    |> Seq.filter (fun (i, x) -> (not << p) x)
+    |> Seq.groupBy fst
+    |> Seq.map (fun (_, b) -> Seq.map snd b)
+
+let readLines = System.IO.File.ReadLines
+
+let binaryToInt s = System.Convert.ToInt32(s, 2)
