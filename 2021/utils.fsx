@@ -36,3 +36,5 @@ let splitSeq p s =
 let readLines = System.IO.File.ReadLines
 
 let binaryToInt s = System.Convert.ToInt32(s, 2)
+
+let commaInts (s : string) = s.Split(",") |> Seq.map int

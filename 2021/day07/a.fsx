@@ -5,7 +5,7 @@ open System
 #load "../utils.fsx"
 open Utils
 
-let input = readLines "input.txt" |> Seq.head |> (fun (s : string) -> s.Split(",")) |> Seq.map int
+let input = readLines "input.txt" |> Seq.head |> commaInts
 
 let calculateFuel crabs pos =
     crabs
