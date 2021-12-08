@@ -38,3 +38,27 @@ let readLines = System.IO.File.ReadLines
 let binaryToInt s = System.Convert.ToInt32(s, 2)
 
 let commaInts (s : string) = s.Split(",") |> Seq.map int
+
+
+// borrowed from https://stackoverflow.com/questions/1526046/f-permutations
+let rec distribute e = function
+    | [] -> [[e]]
+    | x::xs' as xs -> (e::xs)::[for xs in distribute e xs' -> x::xs]
+
+let rec permute = function
+    | [] -> [[]]
+    | e::xs -> List.collect (distribute e) (permute xs)
+
+
+
+
+let mapInvert map = map |> Map.toSeq |> Seq.map (fun (a, b) -> (b, a)) |> Map.ofSeq
+
+let mapValues map = map |> Map.toList |> List.map snd
+
+let consolidateDigits ds =
+    let rec go total = function
+    | [] -> total
+    | h :: t -> go (total * 10 + h) t
+
+    go 0 (List.ofSeq ds)
