@@ -31,15 +31,15 @@ let lowPoints map =
         |> Seq.map (fun d' -> d' > d)
         |> Seq.fold (&&) true)
 
-let flood = bfs { floodFunctions with isValidNeighbor = fun _ value -> value < 9 }
+let shortestPaths = bfs { allPointsShortestPathFunctions with isValidNeighbor = fun _ value -> value < 9 }
 
 let result =
     input
     |> lowPoints
-    |> Seq.map (fun (pos, depth) -> flood input (pos, Some depth))
-    |> Seq.map Seq.length
-    |> Seq.sortByDescending id
-    |> Seq.take 3
-    |> Seq.fold ( * ) 1
+    |> Seq.map (fun (pos, depth) -> shortestPaths input (pos, [pos]))
+    (*|> Seq.map Seq.length*)
+    (*|> Seq.sortByDescending id*)
+    (*|> Seq.take 3*)
+    (*|> Seq.fold ( * ) 1*)
 
 printfn "%A" result
