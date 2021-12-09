@@ -62,3 +62,43 @@ let consolidateDigits ds =
     | h :: t -> go (total * 10 + h) t
 
     go 0 (List.ofSeq ds)
+
+(*let bfsGenerator neighbors isTarget start cells =*)
+    (*let rec step visited queue =*)
+        (*let (cur, path) = List.head queue*)
+        (*if isTarget cur then Some (List.rev path)*)
+        (*else*)
+            (*let potentialNeighbors*)
+
+
+
+
+
+let bfs
+        (neighbors : 'pos -> 'pos list)
+        (isValidNeighbor : 'pos -> 'value -> bool)
+        (isTarget : 'pos -> 'value -> bool)
+        (noMatch : Set<'pos> -> 'a)
+        (foundMatch : 'pos -> 'value -> 'a)
+        (map : Map<'pos, 'value>)
+        (start : 'pos) =
+    let rec step searched = function
+        | [] -> noMatch searched
+        | pos :: queue ->
+            if Set.contains pos searched then
+                step searched queue
+            else
+                let value = map |> Map.find pos
+                if isTarget pos value then foundMatch pos value
+                else
+                    let potentialNeighbors =
+                        pos
+                        |> neighbors
+                        |> Seq.filter (fun pos' -> Map.containsKey pos' map)
+                        |> Seq.filter (fun pos' -> not ((Set.contains pos' searched) || (List.contains pos' queue)))
+                        |> Seq.filter (fun pos' -> isValidNeighbor pos' (Map.find pos' map))
+                        |> List.ofSeq
+
+                    step (Set.add pos searched) (queue @ potentialNeighbors)
+
+    step (Set.empty) [start]
