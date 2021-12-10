@@ -7,12 +7,8 @@ open Utils
 
 let input =
     readLines "input.txt"
-    |> Seq.map Seq.indexed
-    |> Seq.indexed
-    |> Seq.collect (fun (r, rs) -> rs |> Seq.map (fun (c, x) -> ((r, c), int x - int '0')))
+    |> indexCharacters (fun x -> int x - int '0')
     |> Map.ofSeq
-
-(*printfn "%A" input*)
 
 let neighbors (r, c) =
     [
@@ -37,9 +33,5 @@ let result =
     input
     |> lowPoints
     |> Seq.map (fun (pos, depth) -> shortestPaths input (pos, [pos]))
-    (*|> Seq.map Seq.length*)
-    (*|> Seq.sortByDescending id*)
-    (*|> Seq.take 3*)
-    (*|> Seq.fold ( * ) 1*)
 
 printfn "%A" result

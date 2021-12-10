@@ -63,13 +63,12 @@ let consolidateDigits ds =
 
     go 0 (List.ofSeq ds)
 
-(*let bfsGenerator neighbors isTarget start cells =*)
-    (*let rec step visited queue =*)
-        (*let (cur, path) = List.head queue*)
-        (*if isTarget cur then Some (List.rev path)*)
-        (*else*)
-            (*let potentialNeighbors*)
 
+let indexCharacters f input =
+    input
+    |> Seq.map Seq.indexed
+    |> Seq.indexed
+    |> Seq.collect (fun (r, rs) -> rs |> Seq.map (fun (c, x) -> ((r, c), f x)))
 
 
 type BfsFunctions<'pos, 'value, 'data, 'output when 'pos : comparison> = {
@@ -78,7 +77,7 @@ type BfsFunctions<'pos, 'value, 'data, 'output when 'pos : comparison> = {
     isTarget : 'pos -> 'value -> bool
     updateCellData : 'pos -> 'data -> 'value -> ('pos * 'data)
     noMatch : Map<'pos, 'data> -> 'output
-    foundMatch : 'pos -> 'value -> 'output
+    foundMatch : 'pos -> 'data -> 'output
 }
 
 let floodFunctions : BfsFunctions<(int * int), int, int option, Set<int * int>> = {
@@ -99,6 +98,15 @@ let allPointsShortestPathFunctions : BfsFunctions<(int * int), int, (int * int) 
     foundMatch = fun _ _ -> Map.empty
 }
 
+let singlePointShortestPathFunctions : BfsFunctions<(int * int), int, (int * int) list, (int * int) list option> = {
+    neighbors = fun (r, c) -> [ (r + 1, c); (r - 1, c); (r, c + 1); (r, c - 1) ]
+    isValidNeighbor = fun _ _ -> true
+    isTarget = fun _ _ -> false
+    updateCellData = fun pos oldPath _ -> (pos, pos :: oldPath)
+    noMatch = fun _ -> None
+    foundMatch = fun _ data -> Some data
+}
+
 let bfs
         (fs : BfsFunctions<'pos, 'value, 'data, 'output>)
         (map : Map<'pos, 'value>)
@@ -112,7 +120,7 @@ let bfs
             else
                 let value = map |> Map.find pos
 
-                if fs.isTarget pos value then fs.foundMatch pos value
+                if fs.isTarget pos value then fs.foundMatch pos data
                 else
                     let potentialNeighbors =
                         pos
@@ -127,7 +135,42 @@ let bfs
 
     step (Map.empty) [start]
 
+let dijkstra
+        (nodes : seq<'v>)
+        (edges : Map<('v * 'v), int>)
+        (start : 'v) =
 
+    let INFINITY = System.Int32.MaxValue
 
+    (*let name = fst*)
+    let distance = snd >> fst
+    (*let prev = snd >> snd*)
 
+    let init v = (v, (INFINITY, v))
+    let nodeMap =
+        nodes 
+        |> Seq.map init
+        |> Map.ofSeq
+        |> Map.add start (0, start)
 
+    let allInfinity map = map |> Map.forall (fun _ (d, _) -> d = INFINITY)
+
+    let closest map = map |> Map.toSeq |> Seq.minBy distance
+
+    let rec step processed unprocessed =
+        if Map.isEmpty unprocessed then processed
+        elif allInfinity unprocessed then processed
+        else
+            let (n, (d, p)) = closest unprocessed
+
+            let updatedUnprocessed =
+                unprocessed
+                |> Map.remove n
+                |> Map.map (fun n' (d', p') ->
+                    match Map.tryFind (n, n') edges with
+                    | Some x -> if d + x < d' then (d + x, n) else (d', p')
+                    | None -> (d', p'))
+
+            step (Map.add n (d, p) processed) updatedUnprocessed
+
+    step Map.empty nodeMap

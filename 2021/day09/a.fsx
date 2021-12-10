@@ -7,20 +7,10 @@ open Utils
 
 let input =
     readLines "input.txt"
-    |> Seq.map Seq.indexed
-    |> Seq.indexed
-    |> Seq.collect (fun (r, rs) -> rs |> Seq.map (fun (c, x) -> ((r, c), int x - int '0')))
+    |> indexCharacters (fun x -> int x - int '0')
     |> Map.ofSeq
 
-printfn "%A" input
-
-let neighbors (r, c) =
-    [
-        (r + 1, c);
-        (r - 1, c);
-        (r, c + 1);
-        (r, c - 1)
-    ]
+let neighbors (r, c) = [ (r + 1, c); (r - 1, c); (r, c + 1); (r, c - 1) ]
 
 let lowPoints map =
     map
@@ -34,8 +24,7 @@ let lowPoints map =
 let result =
     input
     |> lowPoints
-    |> Seq.map snd
-    |> Seq.map ((+) 1)
+    |> Seq.map (snd >> (+) 1)
     |> Seq.sum
 
 printfn "%A" result
