@@ -5,7 +5,7 @@ open System
 #load "../utils.fsx"
 open Utils
 
-let input = readLines "input.txt" |> Seq.cache
+let input = readLines "input.txt" |> List.ofSeq
 
 let parseInput input =
     let pointsText, foldsText =
@@ -49,7 +49,7 @@ let dumpImage points =
     [0..numRows]
     |> List.map (fun row ->
         [0..numCols]
-        |> List.map (fun col -> if Set.contains (col, row) points then "*" else " ")
+        |> List.map (fun col -> if Set.contains (col, row) points then "█" else " ")
         |> String.concat "")
     |> String.concat "\n"
 
