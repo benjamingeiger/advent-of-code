@@ -5,28 +5,18 @@ open System
 #load "../utils.fsx"
 open Utils
 
-let input = readLines "input.txt" |> List.ofSeq
+let rawInput = readLines "input.txt" |> List.ofSeq
 
-let parseInput input =
-    input
+let parseInput rawInput =
+    rawInput
     |> splitSeq ((=) "")
     |> Seq.map (Seq.map int)
 
-let result =
-    let stopwatch = System.Diagnostics.Stopwatch.StartNew()
+let run input =
+    input
+    |> Seq.map (Seq.sum)
+    |> Seq.sortDescending
+    |> Seq.take 3
+    |> Seq.sum
 
-    let parsed = parseInput input
-
-    let returnValue =
-        parsed
-        |> Seq.map (Seq.sum)
-        |> Seq.sortDescending
-        |> Seq.take 3
-        |> Seq.sum
-
-    stopwatch.Stop()
-    printfn "Elapsed milliseconds: %f" stopwatch.Elapsed.TotalMilliseconds
-
-    returnValue
-
-printfn "%A" result
+doProcess parseInput run rawInput

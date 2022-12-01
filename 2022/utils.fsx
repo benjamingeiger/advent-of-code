@@ -3,6 +3,17 @@
 open System.Collections.Generic 
 open System.Text.RegularExpressions
 
+let doProcess parseInput run rawInput =
+    let stopwatch = System.Diagnostics.Stopwatch.StartNew()
+
+    let result =
+        rawInput
+        |> parseInput
+        |> run
+
+    stopwatch.Stop()
+    printfn "Elapsed milliseconds: %f" stopwatch.Elapsed.TotalMilliseconds
+    printfn "Result: %A" result
 
 // Input utilities.
 
