@@ -71,8 +71,8 @@ let splitSeq p s =
     let i = ref 0
     s
     |> Seq.map (fun x ->
-        if p x then incr i
-        !i, x)
+        if p x then i.Value <- i.Value + 1
+        i.Value, x)
     |> Seq.filter (fun (i, x) -> (not << p) x)
     |> Seq.groupBy fst
     |> Seq.map (fun (_, b) -> Seq.map snd b)
