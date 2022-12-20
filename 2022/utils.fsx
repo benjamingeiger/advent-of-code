@@ -101,3 +101,94 @@ let consolidateDigits ds =
     | h :: t -> go (total * 10 + h) t
 
     go 0 (List.ofSeq ds)
+
+
+module Deque =
+    type Deque<'a> = Empty | Deque of 'a list  * 'a list
+
+    let empty = Empty
+
+    let ofSeq xs = Deque ([], List.ofSeq xs)
+
+    let toList = function
+        | Empty -> []
+        | Deque (back, front) -> front @ (List.rev back)
+
+    let dump = function
+        | Empty -> "[empty deque]"
+        | Deque (back, front) -> sprintf "[deque: %A]" (front @ (List.rev back))
+
+    let private flip = function
+        | Empty -> Empty
+        | Deque ([], front) -> Deque (List.rev front, [])
+        | Deque (back, []) -> Deque ([], List.rev back)
+        | Deque (back, front) -> Deque (back, front)
+
+    let size = function
+        | Empty -> 0
+        | Deque (back, front) -> List.length back + List.length front
+
+    let enqueueFront e = function
+        | Empty -> Deque ([], [e])
+        | Deque (back, front) -> Deque (back, e :: front)
+
+    let enqueueBack e = function
+        | Empty -> Deque ([], [e])
+        | Deque (back, front) -> Deque (e :: back, front)
+
+    let rec tryDequeueFront = function
+        | Empty -> (None, Empty)
+        | Deque (back, []) as deque -> tryDequeueFront (flip deque)
+        | Deque (back, x :: xs) as deque -> (Some x, Deque (back, xs))
+
+    let dequeueFront deque =
+        match tryDequeueFront deque with
+        | (None, _) -> failwith "Attempted to dequeue from empty queue"
+        | (Some x, deque') -> (x, deque')
+
+    let rec tryDequeueBack = function
+        | Empty -> (None, Empty)
+        | Deque ([], front) as deque -> tryDequeueBack (flip deque)
+        | Deque (x :: xs, front) as deque -> (Some x, Deque (xs, front))
+
+    let dequeueBack deque =
+        match tryDequeueBack deque with
+        | (None, _) -> failwith "Attempted to dequeue from empty queue"
+        | (Some x, deque') -> (x, deque')
+
+    let rec rotateForward n deque =
+        if n >= (size deque) && (size deque > 0)
+        then rotateForward (n % size deque) deque
+        else
+            match deque with
+            | Empty -> Empty
+            | Deque (back, []) -> rotateForward n (flip deque)
+            | Deque (back, x :: xs) ->
+                if n = 0 then Deque (back, x :: xs)
+                elif n = 1 then Deque (x :: back, xs)
+                elif (n - 1) < List.length xs then Deque ((xs |> List.take (n - 1) |> List.rev) @ (x :: back), List.skip (n - 1) xs)
+                else rotateForward (n - (List.length xs + 1)) (Deque ([], (List.rev back) @ (x :: xs)))
+
+    let rec rotateBack n deque =
+        if n >= (size deque) && (size deque) > 0
+        then rotateBack (n % size deque) deque
+        else
+            match deque with
+            | Empty -> Empty
+            | Deque ([], front) -> rotateBack n (flip deque)
+            | Deque (x :: xs, front) ->
+                if n = 0 then Deque (x :: xs, front)
+                elif n = 1 then Deque (xs, x :: front)
+                elif (n - 1) < List.length xs then Deque (List.skip (n - 1) xs, (xs |> List.take (n - 1) |> List.rev) @ (x :: front))
+                else rotateBack (n - (List.length xs + 1)) (Deque ((List.rev front) @ (x :: xs), []))
+
+    let rotateTo item deque =
+        match deque with
+        | Empty -> Empty
+        | Deque (back, front) ->
+            match List.tryFindIndex ((=) item) front with
+            | Some index -> deque |> rotateForward index
+            | None ->
+                match List.tryFindIndex ((=) item) back with
+                | Some index -> deque |> rotateBack (index + 1)
+                | None -> deque
