@@ -190,6 +190,6 @@ cabal.project.local~
 
 
 getinput.sh
-input.real.txt
-input.test.txt
-
+input.*.txt
+input.txt
+# Apparently we've been requested not to commit input files.
