@@ -1,17 +1,11 @@
 class Day01 extends Day {
 
-    def toInt(s: String) =
-        try
-            Some(s.toInt)
-        catch 
-            case ex: Exception => None
-
     def groupSums(lines: Seq[String]) =
         var total = 0
         var groups = List[Int]()
 
         for line <- lines do
-            toInt(line) match
+            line.toIntOption match
                 case Some(i) => total = total + i
                 case None =>
                     groups = total :: groups
@@ -23,7 +17,7 @@ class Day01 extends Day {
         groupSums(lines).max.toString
 
     override def partTwo(lines: Seq[String]) =
-        "bar"
+        groupSums(lines).sorted(Ordering.Int.reverse).take(3).sum.toString
 }
 
 object Day01 {
