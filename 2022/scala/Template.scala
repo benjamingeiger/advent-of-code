@@ -1,9 +1,9 @@
 class Day01 extends Day {
-    override def partOne(lines: Seq[String]) =
-        "foo"
+    //override def partOne(lines: Seq[String]) =
+        //"foo"
 
-    override def partTwo(lines: Seq[String]) =
-        "bar"
+    //override def partTwo(lines: Seq[String]) =
+        //"bar"
 }
 
 object Day01 {
