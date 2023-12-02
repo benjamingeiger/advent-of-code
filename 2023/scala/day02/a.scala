@@ -1,6 +1,6 @@
 import scala.io.Source
 
-object AdventOfCodeDay01 {
+object AdventOfCodeDay02 {
     def main(args: Array[String])
     {
         val inputFileName = if (args.length > 0) args(0) else "input.txt"
