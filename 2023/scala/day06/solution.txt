@@ -1,0 +1,13 @@
+This one I did via Wolfram Alpha mainly because I was too lazy to do the algebra.
+
+Let the race time be t and the delay in launch be d. Then the total distance (x)
+is equal to:
+
+x = (t - d) * d
+
+So, the solution to part 1 is to determine how many delays d lead to a
+greater distance than the record (r).
+
+This can be done by calculating the zero crossings of ((t - d) * d) - r. Round
+the lower crossing up and the higher crossing down. (When the zero crossing is
+an integer, note that ties aren't successes, so add or subtract as needed.)
